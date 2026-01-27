@@ -6,7 +6,6 @@ import {
   Icon,
   IconButton,
   Media,
-  RevealFx,
   Tag,
   Text,
   Meta,
@@ -37,7 +36,7 @@ export default function About() {
     { title: "Publications", display: true, items: [] },
   ];
   return (
-    <Column maxWidth="m">
+    <Column maxWidth="m" fillWidth>
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -63,21 +62,16 @@ export default function About() {
           <TableOfContents structure={structure} about={about} />
         </Column>
       )}
-      <Row fillWidth s={{ direction: "column"}} horizontal="center">
+
+      <Column fillWidth gap="xl" horizontal="center" style={{ maxWidth: "100%" }}>
         {about.avatar.display && (
           <Column
             className={styles.avatar}
-            top="64"
-            fitHeight
-            position="sticky"
-            s={{ position: "relative", style: { top: "auto" } }}
-            xs={{ style: { top: "auto" } }}
-            minWidth={180}
-            paddingX="l"
-            paddingBottom="xl"
-            gap="m"
-            flex={3}
+            fillWidth
             horizontal="center"
+            gap="m"
+            paddingX="l"
+            paddingBottom="l"
           >
             <div className="about-avatar-lg">
               <Avatar src={person.avatar} size="xl" />
@@ -86,7 +80,7 @@ export default function About() {
               India/New Delhi
             </Text>
             {person.languages && person.languages.length > 0 && (
-              <Row wrap gap="8">
+              <Row wrap gap="8" horizontal="center">
                 {person.languages.map((language, index) => (
                   <Tag key={index} size="l">
                     {language}
@@ -96,13 +90,13 @@ export default function About() {
             )}
           </Column>
         )}
-        <Column className={styles.blockAlign} flex={9} maxWidth={40}>
+
+        <Column fillWidth gap="l" style={{ maxWidth: "36rem" }}>
           <Column
             id={about.intro.title}
             fillWidth
-            minHeight="160"
             vertical="center"
-            marginBottom="32"
+            marginBottom="8"
           >
             {about.calendar.display && (
               <Row
@@ -151,44 +145,42 @@ export default function About() {
                 data-border="rounded"
               >
                 {social
-                      .filter((item) => item.essential)
-                      .map(
-                  (item) =>
-                    item.link && (
-                      <React.Fragment key={item.name}>
-                        <Row s={{ hide: true }}>
-                          <Button
-                            key={item.name}
-                            href={item.link}
-                            prefixIcon={item.icon}
-                            label={item.name}
-                            size="s"
-                            weight="default"
-                            variant="secondary"
-                          />
-                        </Row>
-                        <Row hide s={{ hide: false }}>
-                          <IconButton
-                            size="l"
-                            key={`${item.name}-icon`}
-                            href={item.link}
-                            icon={item.icon}
-                            variant="secondary"
-                          />
-                        </Row>
-                      </React.Fragment>
-                    ),
-                )}
+                  .filter((item) => item.essential)
+                  .map(
+                    (item) =>
+                      item.link && (
+                        <React.Fragment key={item.name}>
+                          <Row s={{ hide: true }}>
+                            <Button
+                              key={item.name}
+                              href={item.link}
+                              prefixIcon={item.icon}
+                              label={item.name}
+                              size="s"
+                              weight="default"
+                              variant="secondary"
+                            />
+                          </Row>
+                          <Row hide s={{ hide: false }}>
+                            <IconButton
+                              size="l"
+                              key={`${item.name}-icon`}
+                              href={item.link}
+                              icon={item.icon}
+                              variant="secondary"
+                            />
+                          </Row>
+                        </React.Fragment>
+                      )
+                  )}
               </Row>
             )}
           </Column>
 
           {about.intro.display && (
-            <RevealFx translateY="8" delay={0.1}>
-              <Column textVariant="body-default-l" fillWidth gap="m" marginBottom="xl">
-                {about.intro.description}
-              </Column>
-            </RevealFx>
+            <Column textVariant="body-default-l" fillWidth gap="m" marginBottom="xl">
+              {about.intro.description}
+            </Column>
           )}
 
           {about.work.display && (
@@ -212,22 +204,22 @@ export default function About() {
                     </Text>
                     <Column as="ul" gap="16">
                       {experience.achievements.map(
-                        (achievement: React.ReactNode, index: number) => (
+                        (achievement: React.ReactNode, i: number) => (
                           <Text
                             as="li"
                             variant="body-default-m"
-                            key={`${experience.company}-${index}`}
+                            key={`${experience.company}-${i}`}
                           >
                             {achievement}
                           </Text>
-                        ),
+                        )
                       )}
                     </Column>
                     {experience.images && experience.images.length > 0 && (
                       <Row fillWidth paddingTop="m" paddingLeft="40" gap="12" wrap>
-                        {experience.images.map((image, index) => (
+                        {experience.images.map((image, i) => (
                           <Row
-                            key={index}
+                            key={i}
                             border="neutral-medium"
                             radius="m"
                             minWidth={image.width}
@@ -251,7 +243,7 @@ export default function About() {
           )}
 
           {about.studies.display && (
-            <RevealFx translateY="8" delay={0.15}>
+            <>
               <Heading as="h2" id={about.studies.title} variant="display-strong-s" marginBottom="m">
                 {about.studies.title}
               </Heading>
@@ -277,11 +269,11 @@ export default function About() {
                   </Column>
                 ))}
               </Column>
-            </RevealFx>
+            </>
           )}
 
           {about.technical.display && (
-            <RevealFx translateY="8" delay={0.2}>
+            <>
               <Heading
                 as="h2"
                 id={about.technical.title}
@@ -292,7 +284,7 @@ export default function About() {
               </Heading>
               <Column fillWidth gap="l" marginBottom="32">
                 {about.technical.skills.map((skill, index) => (
-                  <Column key={`${skill}-${index}`} fillWidth gap="4">
+                  <Column key={`${skill.title}-${index}`} fillWidth gap="4">
                     <Text id={skill.title} variant="heading-strong-l">
                       {skill.title}
                     </Text>
@@ -310,9 +302,9 @@ export default function About() {
                     )}
                     {skill.images && skill.images.length > 0 && (
                       <Row fillWidth paddingTop="m" gap="12" wrap>
-                        {skill.images.map((image, index) => (
+                        {skill.images.map((image, i) => (
                           <Row
-                            key={index}
+                            key={i}
                             border="neutral-medium"
                             radius="m"
                             minWidth={image.width}
@@ -332,11 +324,10 @@ export default function About() {
                   </Column>
                 ))}
               </Column>
-            </RevealFx>
+            </>
           )}
 
-          <RevealFx translateY="8" delay={0.25}>
-          <Heading as="h2" id="Publications" variant="display-strong-s" marginTop="64" marginBottom="24">
+          <Heading as="h2" id="Publications" variant="display-strong-s" marginTop="48" marginBottom="24">
             Publications
           </Heading>
           <Column fillWidth gap="l" marginBottom="40" className="journey-block publications-block">
@@ -395,9 +386,8 @@ export default function About() {
               </Column>
             </Column>
           </Column>
-          </RevealFx>
         </Column>
-      </Row>
+      </Column>
     </Column>
   );
 }
