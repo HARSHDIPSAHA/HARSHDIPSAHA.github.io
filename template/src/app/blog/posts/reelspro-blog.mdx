@@ -1,0 +1,422 @@
+---
+title: "Building a TikTok Clone: Vertical Video, Infinite Scroll, and Authentication Deep Dive"
+publishedAt: "2025-06-15"
+summary: "A journey through creating a short-form video platform from scratch.  Learn about video streaming optimization, infinite scroll implementation, authentication patterns, and the hidden challenges of building social media features."
+image: "/images/projects/reelspro/reelspro-login.png"
+tag: "Full-Stack Development"
+---
+
+## Why Build Another Video Platform?
+
+Fair question. With TikTok, Instagram Reels, and YouTube Shorts dominating, why create **ReelsPro**?
+
+The answer: **to understand the architecture behind addictive social feeds. ** This project taught me more about full-stack development than any tutorial ever could.
+
+## The Core Architecture
+
+### The Tech Stack Choices
+
+```
+Frontend:  Next.js 15 + TypeScript
+Backend:   Next.js API Routes
+Database:  MongoDB (Mongoose)
+Auth:      NextAuth.js
+Storage:   ImageKit CDN
+Styling:   Tailwind CSS + shadcn/ui
+```
+
+**Why MongoDB?** Flexible schema for evolving video metadata (likes, views, shares). Easy to add new fields without migrations.
+
+**Why ImageKit?** Video transcoding, adaptive streaming, and CDN delivery out of the box. No reinventing wheels.
+
+## Feature #1: The Vertical Scrolling Feed
+
+This was *the* defining challenge. Users expect: 
+
+- **Seamless infinite scroll** (no loading spinners)
+- **Auto-play current video** (pause others)
+- **Smooth transitions** (60fps minimum)
+
+### Intersection Observer:  The Secret Sauce
+
+```tsx
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.play()
+        } else {
+          entry.target. pause()
+        }
+      })
+    },
+    { threshold:  0.75 } // Play when 75% visible
+  )
+
+  videoRefs.current.forEach((video) => observer.observe(video))
+
+  return () => observer.disconnect()
+}, [videos])
+```
+
+**Key Insight**: `threshold:  0.75` prevents videos from auto-playing when users scroll too fast.  Better UX than aggressive auto-play.
+
+### Infinite Scroll with Cursor-Based Pagination
+
+Offset pagination breaks when new videos are added.  Cursor-based pagination solves this:
+
+```typescript
+// API Route
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const cursor = searchParams.get('cursor')
+  
+  const videos = await Video.find(cursor ?  { _id: { $lt: cursor } } : {})
+    .sort({ createdAt: -1 })
+    .limit(10)
+  
+  return Response.json({
+    videos,
+    nextCursor: videos[videos.length - 1]? ._id
+  })
+}
+```
+
+**Frontend integration** with React Query (now TanStack Query):
+
+```tsx
+const { data, fetchNextPage } = useInfiniteQuery({
+  queryKey: ['videos'],
+  queryFn: ({ pageParam = null }) => fetchVideos(pageParam),
+  getNextPageParam: (lastPage) => lastPage.nextCursor
+})
+```
+
+## Feature #2: Video Upload Pipeline
+
+Users expect to upload videos like they post tweets.  Behind the scenes, it's *complex*. 
+
+### The Upload Flow
+
+1. **Client-side validation** (duration, aspect ratio, file size)
+2. **Get ImageKit auth token** from backend
+3. **Upload to ImageKit CDN** (direct from browser)
+4. **Create database record** with video URL
+5. **Trigger background processing** (thumbnails, transcoding)
+
+### Client-Side Validation That Matters
+
+```typescript
+const validateVideo = async (file: File): Promise<VideoValidation> => {
+  // Check file size (max 100MB)
+  if (file.size > 100 * 1024 * 1024) {
+    return { valid: false, error: 'File too large' }
+  }
+
+  // Load video to check duration and aspect ratio
+  const video = document.createElement('video')
+  video.src = URL.createObjectURL(file)
+  
+  await new Promise((resolve) => {
+    video.onloadedmetadata = resolve
+  })
+
+  // Max 60 seconds
+  if (video.duration > 60) {
+    return { valid: false, error: 'Video must be ≤ 60 seconds' }
+  }
+
+  // 9:16 aspect ratio (vertical)
+  const ratio = video.videoHeight / video.videoWidth
+  if (ratio < 1.5 || ratio > 2.0) {
+    return { valid: false, error: 'Use vertical video (9:16)' }
+  }
+
+  return { valid: true }
+}
+```
+
+**Lesson Learned**:  Validate early, fail fast.  Uploading a 200MB horizontal video only to reject it wastes bandwidth and user time.
+
+### ImageKit Integration
+
+```typescript
+// Get upload credentials
+const authResponse = await fetch('/api/imagekit-auth')
+const { token, signature, expire } = await authResponse.json()
+
+// Upload with progress tracking
+const imagekit = new ImageKit({
+  publicKey: process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY! ,
+  authenticationEndpoint: '/api/imagekit-auth'
+})
+
+imagekit.upload({
+  file: videoFile,
+  fileName: `${userId}-${Date.now()}.mp4`,
+  folder: '/videos',
+  onUploadProgress: (progress) => {
+    setUploadProgress((progress.loaded / progress.total) * 100)
+  }
+})
+```
+
+**Why this pattern?** Direct browser-to-CDN uploads bypass your server (saves bandwidth, faster uploads).
+
+## Feature #3: Authentication with NextAuth.js
+
+Users need persistent identity for likes, comments, and uploads. 
+
+### The NextAuth Setup
+
+```typescript
+// app/api/auth/[... nextauth]/route.ts
+export const authOptions:  NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        phone: { label: 'Phone', type: 'text' },
+        password: { label: 'Password', type: 'password' }
+      },
+      async authorize(credentials) {
+        const user = await User.findOne({ phone: credentials.phone })
+        
+        if (!user || !(await bcrypt.compare(credentials.password, user.password))) {
+          return null
+        }
+        
+        return { id: user._id, phone: user.phone }
+      }
+    })
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) token.userId = user.id
+      return token
+    },
+    async session({ session, token }) {
+      session.user. id = token.userId
+      return session
+    }
+  }
+}
+```
+
+### Protecting API Routes
+
+```typescript
+// API route for video upload
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions)
+  
+  if (!session) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  
+  // Process upload... 
+}
+```
+
+**Key Takeaway**: Always validate sessions server-side. Client-side checks are for UX, not security. 
+
+## Feature #4: Likes & Comments
+
+Social features make or break engagement.
+
+### Optimistic Updates
+
+Users shouldn't wait for the server to confirm their like: 
+
+```tsx
+const likeMutation = useMutation({
+  mutationFn: (videoId: string) => fetch(`/api/videos/${videoId}/like`, { method: 'POST' }),
+  onMutate: async (videoId) => {
+    // Cancel outgoing refetches
+    await queryClient.cancelQueries(['videos'])
+    
+    // Snapshot previous value
+    const previousVideos = queryClient.getQueryData(['videos'])
+    
+    // Optimistically update
+    queryClient.setQueryData(['videos'], (old: any) => ({
+      ...old,
+      pages: old.pages.map((page:  any) => ({
+        ...page,
+        videos: page.videos.map((v: Video) =>
+          v._id === videoId
+            ? { ...v, likes: v.likes + 1, likedByUser: true }
+            : v
+        )
+      }))
+    }))
+    
+    return { previousVideos }
+  },
+  onError: (err, videoId, context) => {
+    // Rollback on error
+    queryClient. setQueryData(['videos'], context?. previousVideos)
+  }
+})
+```
+
+**Why this matters**: Instagram-level perceived performance. Users see their like instantly, even on slow networks.
+
+### Real-Time Comments (Without WebSockets)
+
+Full WebSockets were overkill for MVP. Instead, polling with smart caching:
+
+```tsx
+useQuery({
+  queryKey: ['comments', videoId],
+  queryFn: () => fetchComments(videoId),
+  refetchInterval: 5000, // Poll every 5 seconds when viewing comments
+  staleTime: 3000 // Consider data stale after 3 seconds
+})
+```
+
+**Future optimization**: Implement WebSockets when concurrent users > 10,000.
+
+## Challenges That Kept Me Up at Night
+
+### 1. Video Buffering on Slow Networks
+
+Initial approach: Load full videos upfront. Result: 10-second wait times on 3G.
+
+**Solution**: Adaptive bitrate streaming via ImageKit transformations:
+
+```html
+<video>
+  <source src={`${videoUrl}/ik-video.mp4? tr=q-auto,f-auto`} />
+</video>
+```
+
+The `q-auto` param dynamically adjusts quality based on user bandwidth.
+
+### 2. Memory Leaks from Video Elements
+
+Infinite scroll + video elements = memory nightmare.  Videos stayed in DOM even after scrolling past.
+
+**Solution**: Virtual scrolling with `react-window`:
+
+```tsx
+<FixedSizeList
+  height={window.innerHeight}
+  itemCount={videos.length}
+  itemSize={window.innerHeight}
+>
+  {({ index, style }) => (
+    <div style={style}>
+      <VideoPlayer video={videos[index]} />
+    </div>
+  )}
+</FixedSizeList>
+```
+
+Only 3-5 videos exist in DOM at once.  Memory usage dropped 70%.
+
+### 3. Race Conditions in Like/Unlike
+
+User rapidly clicks like → multiple API calls → inconsistent state.
+
+**Solution**:  Debounce and request deduplication:
+
+```tsx
+const debouncedLike = useMemo(
+  () => debounce((videoId: string) => likeMutation. mutate(videoId), 300),
+  []
+)
+```
+
+TanStack Query automatically deduplicates identical requests.
+
+## Performance Optimizations
+
+### 1. Image Optimization for Thumbnails
+
+```tsx
+<Image
+  src={video.thumbnailUrl}
+  alt={video.title}
+  width={180}
+  height={320}
+  placeholder="blur"
+  blurDataURL={video.blurHash}
+/>
+```
+
+Next.js automatically serves WebP to modern browsers, JPEG to older ones.
+
+### 2. Database Indexing
+
+```typescript
+// MongoDB indexes for fast queries
+VideoSchema.index({ createdAt: -1 }) // Sort by newest
+VideoSchema.index({ userId: 1 }) // User profile videos
+VideoSchema.index({ likes: -1 }) // Trending videos
+```
+
+Query time dropped from 800ms → 30ms for 10,000 video collection.
+
+### 3. Server-Side Caching
+
+```typescript
+import { unstable_cache } from 'next/cache'
+
+const getTrendingVideos = unstable_cache(
+  async () => {
+    return await Video.find().sort({ likes: -1 }).limit(20)
+  },
+  ['trending-videos'],
+  { revalidate: 300 } // Cache for 5 minutes
+)
+```
+
+## What I'd Build Next
+
+1. **Recommendation Algorithm**: Currently chronological. Need collaborative filtering based on watch time. 
+2. **Real-Time Notifications**: WebSockets for instant like/comment alerts.
+3. **Video Editing Tools**: Trim, add text overlays, filters (think CapCut integration).
+4. **Analytics Dashboard**: Creators want view counts, engagement rates, audience demographics. 
+
+## Key Learnings for Aspiring Full-Stack Devs
+
+1. **Vertical scroll isn't just CSS**:  Intersection Observer + virtual scrolling + optimistic updates = smooth UX
+2. **CDN for videos is non-negotiable**: Don't serve videos from your app server—bandwidth costs will ruin you
+3. **Optimistic UI > Loading spinners**: Users perceive instant interactions as "fast," even if network is slow
+4. **NextAuth.js handles 80% of auth**: Don't roll your own session management
+5. **Monitor memory in dev tools**: Video apps leak memory fast—profile early, profile often
+
+## Tech Stack Breakdown
+
+| Layer            | Technology      | Why                              |
+| ---------------- | --------------- | -------------------------------- |
+| Frontend         | Next. js 15      | SSR, API routes, file routing    |
+| Language         | TypeScript      | Type safety for video metadata   |
+| Database         | MongoDB         | Flexible schema, fast reads      |
+| ORM              | Mongoose        | Schema validation, middleware    |
+| Authentication   | NextAuth.js     | Session management, JWT          |
+| Video Storage    | ImageKit        | CDN, transcoding, adaptive       |
+| Styling          | Tailwind CSS    | Utility-first, responsive design |
+| Components       | shadcn/ui       | Accessible, customizable         |
+| State Management | TanStack Query  | Caching, optimistic updates      |
+
+## The Real Achievement
+
+This wasn't about cloning TikTok—it was about **understanding why social feeds are addictive at a technical level**: 
+
+- Infinite scroll removes friction (no "load more" button)
+- Auto-play videos demand attention (no user action needed)
+- Optimistic updates feel instant (psychological reward loop)
+- Vertical format maximizes screen real estate (mobile-first)
+
+**Building ReelsPro taught me that great UX is 20% design, 80% engineering.**
+
+---
+
+**Repository**: [ReelsPro](https://github.com/UtkarshDubeyGIT/Reelspro)  
+**Tech Stack**: Next.js, MongoDB, NextAuth, ImageKit, TypeScript  
+**Features**: Vertical video feed, infinite scroll, authentication, likes, comments
+
+*Built with ❤️ for understanding social media architecture*
