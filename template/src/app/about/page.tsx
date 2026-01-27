@@ -72,14 +72,16 @@ export default function About() {
             position="sticky"
             s={{ position: "relative", style: { top: "auto" } }}
             xs={{ style: { top: "auto" } }}
-            minWidth="160"
+            minWidth="180"
             paddingX="l"
             paddingBottom="xl"
             gap="m"
             flex={3}
             horizontal="center"
           >
-            <Avatar src={person.avatar} size="xl" />
+            <div className="about-avatar-lg">
+              <Avatar src={person.avatar} size="xl" />
+            </div>
             <Text variant="body-default-s" onBackground="neutral-weak">
               India/New Delhi
             </Text>
@@ -288,7 +290,7 @@ export default function About() {
               >
                 {about.technical.title}
               </Heading>
-              <Column fillWidth gap="l">
+              <Column fillWidth gap="l" marginBottom="32">
                 {about.technical.skills.map((skill, index) => (
                   <Column key={`${skill}-${index}`} fillWidth gap="4">
                     <Text id={skill.title} variant="heading-strong-l">
@@ -334,10 +336,10 @@ export default function About() {
           )}
 
           <RevealFx translateY="8" delay={0.25}>
-          <Heading as="h2" id="Publications" variant="display-strong-s" marginTop="48" marginBottom="24">
+          <Heading as="h2" id="Publications" variant="display-strong-s" marginTop="64" marginBottom="24">
             Publications
           </Heading>
-          <Column fillWidth gap="l" marginBottom="40" className="journey-block">
+          <Column fillWidth gap="l" marginBottom="40" className="journey-block publications-block">
             <Column
               fillWidth
               gap="m"

@@ -101,9 +101,8 @@ const about: About = {
           <span className="intro-coral">open to SDE and research internships</span>.
         </p>
         <p className="about-intro-p">
-          Highlights: <span className="intro-violet">All India Rank 14</span> in BRAINDEAD,{" "}
-          <span className="intro-violet">top 30</span> at AI4Humanity Summit (APT), and{" "}
-          <span className="intro-violet">top 45</span> at Smart India Hackathon 2024. I enjoy solving algorithmic puzzles
+          Highlights: <span className="intro-violet">All India Rank 14</span> in BRAINDEAD, and{" "}
+          <span className="intro-violet">top 30</span> at AI4Humanity Summit (APT). I enjoy solving algorithmic puzzles
           and have solved <span className="intro-amber">10,000+</span> problems on LeetCode, GeeksforGeeks, and the like.
         </p>
       </>
@@ -207,6 +206,8 @@ const gallery: Gallery = {
     { src: "/images/gallery/gallery-4.jpeg", alt: "Gallery", orientation: "horizontal" },
     { src: "/images/gallery/gallery-5.jpeg", alt: "Gallery", orientation: "horizontal" },
     { src: "/images/gallery/gallery-6.jpeg", alt: "Gallery", orientation: "horizontal" },
+    { src: "/images/gallery/gallery-7.jpeg", alt: "Gallery", orientation: "horizontal" },
+    { src: "/images/gallery/gallery-8.jpeg", alt: "Gallery", orientation: "horizontal" },
   ],
 };
 
