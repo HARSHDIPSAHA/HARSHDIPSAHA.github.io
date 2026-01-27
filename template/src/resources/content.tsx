@@ -1,5 +1,6 @@
 import { About, Blog, Gallery, Home, Newsletter, Person, Social, Work } from "@/types";
 import { Row, Text } from "@once-ui-system/core";
+import galleryImages from "@/data/gallery.json";
 
 const person: Person = {
   firstName: "Harshdip",
@@ -199,16 +200,7 @@ const gallery: Gallery = {
   label: "Gallery",
   title: `Gallery – ${person.name}`,
   description: `Moments from MICCAI 2025, hackathons, and beyond.`,
-  images: [
-    { src: "/images/gallery/gallery-1.jpeg", alt: "Gallery", orientation: "horizontal" },
-    { src: "/images/gallery/gallery-2.jpeg", alt: "Gallery", orientation: "horizontal" },
-    { src: "/images/gallery/gallery-3.jpeg", alt: "Gallery", orientation: "horizontal" },
-    { src: "/images/gallery/gallery-4.jpeg", alt: "Gallery", orientation: "horizontal" },
-    { src: "/images/gallery/gallery-5.jpeg", alt: "Gallery", orientation: "horizontal" },
-    { src: "/images/gallery/gallery-6.jpeg", alt: "Gallery", orientation: "horizontal" },
-    { src: "/images/gallery/gallery-7.jpeg", alt: "Gallery", orientation: "horizontal" },
-    { src: "/images/gallery/gallery-8.jpeg", alt: "Gallery", orientation: "horizontal" },
-  ],
+  images: galleryImages as { src: string; alt: string; orientation: string }[],
 };
 
 export { person, social, newsletter, home, about, blog, work, gallery };
