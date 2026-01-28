@@ -2,6 +2,7 @@
 
 Personal portfolio site: [harshdipsaha.github.io](https://harshdipsaha.github.io)
 
+[https://harshdipsaha.tech/](https://harshdipsaha.tech/)
 - **Next.js** (App Router, static export)
 - **TypeScript** · **MDX** · **Once UI**
 
