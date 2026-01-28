@@ -135,6 +135,23 @@ const about: About = {
   technical: {
     display: true,
     title: "Technical skills",
+    techStack: [
+      { name: "Python", icon: "python" },
+      { name: "C++", icon: "cplusplus" },
+      { name: "Jupyter", icon: "jupyter" },
+      { name: "Pandas", icon: "pandas" },
+      { name: "PyTorch", icon: "pytorch" },
+      { name: "TensorFlow", icon: "tensorflow" },
+      { name: "scikit-learn", icon: "scikitlearn" },
+      { name: "OpenCV", icon: "opencv" },
+      { name: "MATLAB", icon: "matlab" },
+      { name: "SQL", icon: "sql" },
+      { name: "Docker", icon: "docker" },
+      { name: "Git", icon: "git" },
+      { name: "AWS", icon: "aws" },
+      { name: "GCP", icon: "gcp" },
+      { name: "Hugging Face", icon: "huggingface" },
+    ],
     skills: [
       {
         title: "Machine Learning & Data Science",
@@ -177,6 +194,20 @@ const about: About = {
         ],
         images: [],
       },
+    ],
+  },
+  researchInterests: {
+    display: true,
+    title: "Research interests",
+    items: [
+      "Machine learning",
+      "Artificial intelligence",
+      "Natural language processing",
+      "Computer vision",
+      "Medical AI",
+      "Neuroimaging",
+      "Cloud computing",
+      "Time series analysis",
     ],
   },
 };

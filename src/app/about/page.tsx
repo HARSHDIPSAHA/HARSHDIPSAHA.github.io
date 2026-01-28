@@ -13,6 +13,8 @@ import {
 } from "@once-ui-system/core";
 import { baseURL, about, person, social, home } from "@/resources";
 import TableOfContents from "@/components/about/TableOfContents";
+import TechStackStrip from "@/components/about/TechStackStrip";
+import ResearchInterestsBlock from "@/components/about/ResearchInterestsBlock";
 import styles from "@/components/about/about.module.scss";
 import React from "react";
 import { generateMeta } from "@/utils/meta";
@@ -33,6 +35,7 @@ export default function About() {
     { title: about.work.title, display: about.work.display, items: about.work.experiences.map((e) => e.company) },
     { title: about.studies.title, display: about.studies.display, items: about.studies.institutions.map((i) => i.name) },
     { title: about.technical.title, display: about.technical.display, items: about.technical.skills.map((s) => s.title) },
+    { title: about.researchInterests?.title ?? "Research interests", display: about.researchInterests?.display ?? false, items: [] },
     { title: "Publications", display: true, items: [] },
   ];
   return (
@@ -278,52 +281,71 @@ export default function About() {
                 as="h2"
                 id={about.technical.title}
                 variant="display-strong-s"
-                marginBottom="40"
+                marginBottom="m"
               >
                 {about.technical.title}
               </Heading>
-              <Column fillWidth gap="l" marginBottom="32">
-                {about.technical.skills.map((skill, index) => (
-                  <Column key={`${skill.title}-${index}`} fillWidth gap="4">
-                    <Text id={skill.title} variant="heading-strong-l">
-                      {skill.title}
-                    </Text>
-                    <Text variant="body-default-m" onBackground="neutral-weak">
-                      {skill.description}
-                    </Text>
-                    {skill.tags && skill.tags.length > 0 && (
-                      <Row wrap gap="8" paddingTop="8">
-                        {skill.tags.map((tag, tagIndex) => (
-                          <Tag key={`${skill.title}-${tagIndex}`} size="l" prefixIcon={tag.icon}>
-                            {tag.name}
-                          </Tag>
-                        ))}
-                      </Row>
-                    )}
-                    {skill.images && skill.images.length > 0 && (
-                      <Row fillWidth paddingTop="m" gap="12" wrap>
-                        {skill.images.map((image, i) => (
-                          <Row
-                            key={i}
-                            border="neutral-medium"
-                            radius="m"
-                            minWidth={image.width}
-                            height={image.height}
-                          >
-                            <Media
-                              enlarge
+              {about.technical.techStack && about.technical.techStack.length > 0 ? (
+                <TechStackStrip items={about.technical.techStack} />
+              ) : (
+                <Column fillWidth gap="l" marginBottom="32">
+                  {about.technical.skills.map((skill, index) => (
+                    <Column key={`${skill.title}-${index}`} fillWidth gap="4">
+                      <Text id={skill.title} variant="heading-strong-l">
+                        {skill.title}
+                      </Text>
+                      <Text variant="body-default-m" onBackground="neutral-weak">
+                        {skill.description}
+                      </Text>
+                      {skill.tags && skill.tags.length > 0 && (
+                        <Row wrap gap="8" paddingTop="8">
+                          {skill.tags.map((tag, tagIndex) => (
+                            <Tag key={`${skill.title}-${tagIndex}`} size="l" prefixIcon={tag.icon}>
+                              {tag.name}
+                            </Tag>
+                          ))}
+                        </Row>
+                      )}
+                      {skill.images && skill.images.length > 0 && (
+                        <Row fillWidth paddingTop="m" gap="12" wrap>
+                          {skill.images.map((image, i) => (
+                            <Row
+                              key={i}
+                              border="neutral-medium"
                               radius="m"
-                              sizes={image.width.toString()}
-                              alt={image.alt}
-                              src={image.src}
-                            />
-                          </Row>
-                        ))}
-                      </Row>
-                    )}
-                  </Column>
-                ))}
-              </Column>
+                              minWidth={image.width}
+                              height={image.height}
+                            >
+                              <Media
+                                enlarge
+                                radius="m"
+                                sizes={image.width.toString()}
+                                alt={image.alt}
+                                src={image.src}
+                              />
+                            </Row>
+                          ))}
+                        </Row>
+                      )}
+                    </Column>
+                  ))}
+                </Column>
+              )}
+            </>
+          )}
+
+          {about.researchInterests?.display && about.researchInterests.items.length > 0 && (
+            <>
+              <Heading
+                as="h2"
+                id={about.researchInterests.title}
+                variant="display-strong-s"
+                marginTop="40"
+                marginBottom="m"
+              >
+                {about.researchInterests.title}
+              </Heading>
+              <ResearchInterestsBlock items={about.researchInterests.items} />
             </>
           )}
 

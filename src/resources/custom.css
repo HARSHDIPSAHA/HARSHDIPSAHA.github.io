@@ -177,3 +177,10 @@
     transform: translateY(0);
   }
 }
+
+/* Tech stack strip — dark panel, works in both themes */
+:root {
+  --tech-stack-bg: #1a1d24;
+  --tech-stack-icon: #e2e8f0;
+  --tech-stack-label: #f1f5f9;
+}

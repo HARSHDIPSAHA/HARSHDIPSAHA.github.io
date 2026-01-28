@@ -185,6 +185,8 @@ export interface About extends BasePageConfig {
     display: boolean;
     /** Title for the technical skills section */
     title: string;
+    /** Flat tech stack for strip (icon + name), uses IconName */
+    techStack?: Array<{ name: string; icon: IconName }>;
     /** List of technical skills */
     skills: Array<{
       /** Skill title */
@@ -208,6 +210,12 @@ export interface About extends BasePageConfig {
         height: number;
       }>;
     }>;
+  };
+  /** Research interests section (after Technical skills) */
+  researchInterests?: {
+    display: boolean;
+    title: string;
+    items: string[];
   };
 }
 

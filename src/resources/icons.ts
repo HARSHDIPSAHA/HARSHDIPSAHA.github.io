@@ -34,6 +34,16 @@ import {
   SiPostgresql,
   SiJupyter,
   SiPandas,
+  SiPytorch,
+  SiTensorflow,
+  SiScikitlearn,
+  SiGit,
+  SiGooglecloud,
+  SiHuggingface,
+  SiCplusplus,
+  SiOpencv,
+  SiMysql,
+  SiOctave,
 } from "react-icons/si";
 
 import {
@@ -100,8 +110,18 @@ export const iconLibrary: Record<string, IconType> = {
   python: FaPython,
   jupyter: SiJupyter,
   pandas: SiPandas,
+  pytorch: SiPytorch,
+  tensorflow: SiTensorflow,
+  scikitlearn: SiScikitlearn,
   docker: FaDocker,
+  git: SiGit,
   aws: FaAws,
+  gcp: SiGooglecloud,
+  huggingface: SiHuggingface,
+  cplusplus: SiCplusplus,
+  opencv: SiOpencv,
+  matlab: SiOctave,
+  sql: SiMysql,
 };
 
 export type IconLibrary = typeof iconLibrary;
