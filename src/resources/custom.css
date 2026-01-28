@@ -137,12 +137,12 @@
   animation: journey-fade 0.5s ease-out;
 }
 
-/* About avatar — slightly larger, no collision */
+/* About avatar — large, prominent, no collision */
 .about-avatar-lg {
-  width: 128px;
-  height: 128px;
-  min-width: 128px;
-  min-height: 128px;
+  width: 192px;
+  height: 192px;
+  min-width: 192px;
+  min-height: 192px;
   flex-shrink: 0;
   border-radius: 50%;
   overflow: hidden;

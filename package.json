@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
-    "predev": "node scripts/sync-gallery.mjs",
+    "predev": "node scripts/sync-me.mjs && node scripts/sync-gallery.mjs && node scripts/sync-project-images.mjs",
     "export": "next export",
-    "prebuild": "node scripts/sync-gallery.mjs && node scripts/generate-static.mjs",
+    "prebuild": "node scripts/sync-me.mjs && node scripts/sync-gallery.mjs && node scripts/sync-project-images.mjs && node scripts/generate-static.mjs",
     "build": "next build",
     "biome-write": "npx @biomejs/biome format --write .",
     "start": "next start",
