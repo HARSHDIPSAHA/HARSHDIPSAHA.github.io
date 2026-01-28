@@ -93,7 +93,8 @@ const about: About = {
     description: (
       <>
         <p className="about-intro-p">
-          I'm a CSE undergrad at{" "}
+          I am a pre-final year pursuing{" "}
+          <span className="intro-cyan">Computer Science Engineering with specialisation in AI</span> from{" "}
           <span className="intro-cyan">Netaji Subhas University of Technology (NSUT)</span>, Delhi, and currently a{" "}
           <span className="intro-emerald">UG researcher at NexGenLab NSUT</span>. I work on{" "}
           <span className="intro-amber">machine learning</span>,{" "}
