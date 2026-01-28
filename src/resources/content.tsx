@@ -105,7 +105,7 @@ const about: About = {
         <p className="about-intro-p">
           Highlights: <span className="intro-violet">All India Rank 14</span> in BRAINDEAD, and{" "}
           <span className="intro-violet">top 30</span> at AI4Humanity Summit (APT). I enjoy solving algorithmic puzzles
-          and have solved <span className="intro-amber">10,000+</span> problems on LeetCode, GeeksforGeeks, and the like.
+          and have solved <span className="intro-amber">1000+</span> problems on LeetCode, GeeksforGeeks, and the like.
         </p>
       </>
     ),
